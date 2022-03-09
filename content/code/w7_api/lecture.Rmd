@@ -205,6 +205,14 @@ Before we dive too far down this hole, it is important to note that this wheel h
 ```{r}
 
 install.packages('rgbif')
+library(rgbif)
+
+```
+
+
+
+```{r}
+
 giraffe <- rgbif::occ_search(scientificName = "Giraffa camelopardalis", 
 	limit = 5000)
 
@@ -229,12 +237,6 @@ class(giraffe)
 For simplicity sake, we can use some of the functionality within `rgbif` to just return the data we are interested in, specifying that we only want the raw data, not all the potential data (which includes images, etc.)
 
 
-```{r}
-
-install.packages('rgbif')
-library(rgbif)
-
-```
 
 ```{r}
 
@@ -258,7 +260,7 @@ points(giraffe2$decimalLongitude, giraffe2$decimalLatitude, pch=16,
 ```
 
 
-Giraffes are in the US!!! These are almost certainly zoo records or errors. 
+Giraffes are in the US!!! These are almost certainly zoo records. 
 
 
 
@@ -322,6 +324,7 @@ download.file(url = "https://ndownloader.figshare.com/files/2292171",
 
 
 ```{r}
+
 install.packages('DBI')
 library(DBI)
 
@@ -339,6 +342,9 @@ Just like a spreadsheet with multiple worksheets, a SQLite database can contain 
 
 
 Now that we know we can connect to the database, let's explore how to get the data from its tables into R.
+
+
+
 
 ### Querying the database with the SQL syntax
 
@@ -457,252 +463,6 @@ survPlot <- dplyr::left_join(surveys, plots, by='plot_id')
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
---- 
-
-
-
-## R visualizations
-
-Visualizing data is arguably the most fun thing to do in `R`, and is important to communicate the results of analyses, the structure of data, and the sign and strength of relationships. Also, I definitely recommend routinely plotting out your data in order to visually explore outliers, potential errors, data distributions, etc. This approach can generate new ideas, sanity check the data, and provides immediate feedback to the user on data quality/issues/size/etc.
-
-
-There are multiple schools of though regarding generating visualizations in `R`. The loudest of these camps are the `ggplot2` users. Built using ideas from the Grammar of Graphics, `ggplot2` is integrated into the `tidyverse` and creates some decent-looking plots. I have some issues with the use of `ggplot2`, and will teach you how to make visualizations using base `R`. This is 1) because this course is on reproducibility, and `ggplot2` is liable to change and break your plotting code, and 2) `ggplot2` pretty much creates a language of its own for plotting (e.g., aes, geom_point, etc. etc.) and I would rather focus on things like look more like `R` code that give you the customizability (e.g., Google "how do I change axis label?" or something fairly simple and you will see the `ggplot2` folks struggling). There is also the `lattice` package, which is pretty solid for multi-panel plots and definitely has some cool functions (their `lattice::levelplot()` is a common go-to for making heatmaps for me). But base `R` can make everything you need.  
-
-
-
-
-The `plot` function
-
-```{r}
-
-plot(y=1:10, x=1:10)
-
-```
-
-
-This is an ugly plot. But we can make it prettier. The full range of ways we can make it prettier is provided in the documentation of the `plot` function. For simplicity, I will only go over some basic ways to customize your plots here. 
-
-
-
-```{r, eval=FALSE}
-?plot
-```
-
-
-
-```{r}
-
-plot(x=1:10, y=runif(10), 
-  type='b', 
-  ylab='Y label', 
-  xlab='X label', 
-  pch=1:10, 
-  col=1:10, 
-  las=1
-)
-
-```
-
-
-
-
-
-
-
-
-
-
-The `plot` function is general, and will putatively work with many different objects. Functions written in `R` libraries use base `R` plotting while specifying things specific to the data structure. But there are also a bunch of other base `R` functions for making plots. 
-
-
-
-```{r, eval=FALSE}
-
-plot()
-hist()
-barplot()
-image()
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-## `par` is your friend
-
-`par` is used to set and query your graphical parameters. This is incredibly useful, as it allows you to customize the plotting space itself (e.g., setting margins). If you call `par()` with no specifications, it provides you a long list of all the default parameters. Every single one of these can be changed, giving the user the freedom to design the plotting space exactly to their needs.
-
-
-```{r, eval=FALSE}
-
-par()
-
-```
-
-
-
-
-One of the most useful arguments to `par` in my opinion is setting the plotting margins (`mar` to set inner margins, or `oma` to set outer margins). I mostly worry about the inner margins (`mar`).
-
-```{r}
-
-par(mar=c(5,5,5,5))
-hist(runif(1000), 
-	main='', border='dodgerblue', las=1,
-	xlab='Uniform distribution',
-	col=adjustcolor('dodgerblue', 0.25))
-
-
-par(mar=c(10,10,0.5,0.5))
-hist(runif(1000), 
-	main='', border='dodgerblue', las=1,
-	xlab='Uniform distribution',
-	col=adjustcolor('dodgerblue', 0.25))
-
-
-par(mar=c(4,4,0.5,0.5))
-hist(runif(1000), 
-	main='', border='dodgerblue', las=1,
-	xlab='Uniform distribution',
-	col=adjustcolor('dodgerblue', 0.25))
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Using the layout function to make panel plots
-
-
-```{r}
-
-pdf('panelPlot.pdf')
-layout(matrix(1:4, ncol=2))
-
-hist(runif(1000), 
-	main='', border='dodgerblue', las=1,
-	xlab='Uniform distribution',
-	col=adjustcolor('dodgerblue', 0.25))
-
-hist(rnorm(1000, 5,1),
-	main='', border='firebrick', las=1,
-	xlab='Gaussian distribution',
-	col=adjustcolor('firebrick', 0.25))
-
-hist(rpois(1000, 3),
-	main='', border='purple', las=1,
-	xlab='Poisson distribution',
-	col=adjustcolor('purple', 0.25))
-
-hist(rexp(1000, 1),
-	main='', border='orange', las=1,
-	xlab='Exponential distribution',
-	col=adjustcolor('orange', 0.25))
-dev.off()
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-Modifying base plots (building from scratch). The code below uses the `type='n'` argument, which creates a graphical window, but does not plot the data. We also set `axes=FALSE`, which removes x and y axes. This creates a blank slate that we can layer additional information on.
-
-```{r}
-
-plot(1:10, 
-	type='n', 
-	axes=FALSE)
-
-# plot the points
-points(x=1:5, y=1:5, pch=16, col=1)
-points(x=6:10, y=6:10, pch=16, col=2)
-
-# set up the axes
-axis(1, at=1:10)
-axis(2, at=1:10, las=1)
-
-#Add some text to the plot.
-text(4, 4, 'Some text')
-
-
-# Include a legend
-legend('bottomright', 
-	legend=c('item 1', 'item 2'), 
-	pch=16, col=1:2, bty='n')
-
-```
-
-
-
-From this exercise, we can see that we have complete control over the base `R` plotting. This is not really the case with `ggplot2`, or at least not quite as easily. 
-
-
-
-## Some other side considerations
-
-Color is important while plotting, but we want to make sure that the use of color is informative and accessible to all. Color palettes which are color-blind friendly and easily convertable to greyscale for black-and-white printers. This can be done by Googling color palettes and providing them to `R` as a vector of hex codes (e.g., c("#999999", "#E69F00", "#56B4E9")) or html color names (e.g., `c('dodgerblue', 'firebrick', 'purple')). I like hex codes because they are unlikely to change, and are a good way to specify the exact color you want. 
-
-
-If you want to use existing color palettes, there is no shortage of `R` packages that are just color palettes. My feelings are mixed on this. One of the most developed of these packages is `RColorBrewer`, which has a nice set of palettes to use in different situations (sequential, paired, diverging, etc.), and is really easily accessible and straightforward to use. 
-
-
-```{r, eval=FALSE}
-
-install.packages('RColorBrewer')
-library(RColorBrewer)
-RColorBrewer::display.brewer.all(colorblindFriendly = T)
-
-```
 
 
 

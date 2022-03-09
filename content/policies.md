@@ -1,7 +1,7 @@
 ---
 title: "Policies"
 date: ""
-markup: "mmark"
+markup: "goldmark"
 ---
 
 
@@ -42,6 +42,9 @@ Participation  | 10%
 Group project  | 40% 
 
 
+
+
+
 ### Graduate students
 
 {.table .table-striped}
@@ -72,7 +75,7 @@ This means that I will expect not only a well-written and clear manuscript, but 
 
 
 **Final project proposal**
-Please prepare a short proposal on your final project idea by February 1. The proposal should include:
+Please prepare a short proposal on your final project idea by February 17. The proposal should include:
 
 - Title & description of the project
 - Team members names

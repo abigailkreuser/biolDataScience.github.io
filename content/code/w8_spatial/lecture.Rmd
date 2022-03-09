@@ -451,6 +451,7 @@ But while this is incredibly useful for subsetting data down to a specific regio
 
 r1 <- raster::crop(rast, extent(-140,-120, 0, 30))
 r2 <- raster::crop(rast, extent(-100, -80, 30, 40))
+
 m <- raster::merge(r1, r2)
 plot(m)
 
@@ -516,7 +517,7 @@ Related to this point, in terms of efforts to bridge point/polygon data to raste
 
 ```{r}
 
-rpts <- rasterize(pts, rast)
+rpts <- raster::rasterize(pts, rast)
 
 
 plot(rpts, xlim=c(-130,-105), ylim=c(30,50))
@@ -542,6 +543,7 @@ points(pts)
 points(pts2, pch=16, col='red')
 
 ```
+
 
 There are also ways to examine the shared overlap between raster objects. However, these methods require the user to have R packages `rgdal` and `rgeos`, both of which require backend libraries `gdal` and `geos`, respectively. It doesn't take long to see that spatial data analyses may suffer from some of the reproducibility concerns that we've gone into thus far. 
 
@@ -646,6 +648,140 @@ plot(1:12, brTemp,
 
 
 
+# Docker
+
+### What is Docker?
+
+> an open-source project that automates the deployment of software applications inside containers by providing an additional layer of abstraction and automation of OS-level virtualization on Linux.
+
+Put everything in a box. Keeps things in the box and keeps outside the box clean. This 'box' is typically called a _container_, and it contains all the packages, libraries, etc. needed to run your analyses. It also can automatically run your analyses, using Rscript calls, providing a way for users with no experience in R to still reproduce the code (buggy or not). 
+
+
+### Why use Docker?
+
+It is difficult to convince biologists to use Docker in a lot of cases. For one, it's a new tool that must be learned. Second, for a small subset of end users, it will ensure reproducibility, but for the majority of people who do not know how to use Docker it does nothing. For the subset of folks who do use Docker (or who are willing to try), the payoff is pretty large, in my opinion. Docker should be easily installed across any OS, and many Docker containers come pre-built on Docker Hub [https://hub.docker.com/](https://hub.docker.com/). Large open source projects often have a Docker image hosted on Docker Hub, including Ubuntu, python, node.js, golang, ruby, etc. This is similar to when we learned how to use git and interact with GitHub, in that you can create and version containers on Docker Hub as well as clone existing ones. It's also similar to learning git/Github in that Docker has a lot of jargon, which we'll dive into now. 
+
+
+### Things
+
+**dockerfile**: a plaintext file with a set of commands that builds an image. 
+
+**image**: The basis of containers. Images are created only once, and then can be used multiple times to create any number of containers running that image. 
+
+**container**: A deployed instance of a Docker image. 
+
+
+
+
+### Actions:
+
+**clone**: same as when learning git. `docker clone` will clone a docker image from Docker Hub. 
+
+**commit/pull/push**: same again. These are used to version your docker images.
+
+
+**ps**: list containers
+**images**: list images
+**build**: build an image from a Dockerfile
+**container**: specify actions for a given set of containers (e.g., docker container prune)
+**cp**: copy files/folders between container and your machine
+**rm**: remove one or more containers
+**rmi**: remove one or more images
+**run**: run a commandin a new container
+**start/stop**: start or stop containers
+
+
+
+
+
+
+### Work through an example use case of Docker to demonstrate utility. 
+
+
+
+Start with hello-world 
+
+```{}
+
+docker run hello-world
+docker ps -a
+
+```
+
+
+
+
+
+
+```{}
+
+docker run -it ubuntu sh
+docker ps -a
+
+```
+
+
+
+
+```{}
+
+docker container prune 
+docker ps -a
+
+```
+
+
+
+
+
+
+
+
+### An example R workflow
+
+Why do we even need to do this, instead of just specifying which package version we want to use? 
+
++ can specify different R version
++ can ensure background libraries installed (e.g., curl)
++ don't have to install old packages on your machine!
+
+
+```{}
+
+docker pull rocker/verse
+
+```
+
+
+
+
+```{}
+
+docker build -t myworkflow dockerWorkflow
+docker run myworkflow 
+
+```
+
+
+
+
+```{}
+
+docker run -d myworkflow 
+docker cp awesome_lamarr:/home/analysis.RData .
+docker cp awesome_lamarr:/home/modelperformance.pdf .
+
+```
+
+
+
+
+```{}
+
+docker container prune 
+docker ps -a
+
+```
 
 
 

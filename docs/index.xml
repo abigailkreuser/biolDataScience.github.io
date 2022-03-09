@@ -17,7 +17,7 @@
       <pubDate>Fri, 01 Jan 2021 00:00:00 +0000</pubDate>
       
       <guid>/syllabus/</guid>
-      <description> Syllabus    Date Module Data Topics Read Homework   Week 1 home  Course design, goals, introduction, and setup         MODULE 1: an introduction to computing in R      Week 2    git/GitHub     Week 3   R and R markdown     Week 4   Visualization basics          MODULE 2: host-virus associations      Week 5   An intro to VIRION and strings     Week 6   Data manipulation (base + plyr/dplyr) + CI         MODULE 3: species distribution modeling      Week 7 my_location  Intro to APIs and spatial data     Week 8 my_location  Visualizing and modelling species occurrence data + Docker     Spring break  --- ---      Week 10 my_location  Making informed models + model performance         MODULE 4: ecological simulation      Week 11  satellite Intro to simulation, looping and apply     Week 12  satellite lists and parallelization     Week 13  satellite Probabilistic processes         FINAL PROJECTS     Week 14 &amp;amp; 15 school  Final Projects     Week 15 (GIVE ACTUAL DATE HERE) school  Final Projects DUE       </description>
+      <description> Syllabus    Date Module Data Topics Read Homework   Week 1 home  Course design, goals, introduction, and setup         MODULE 1: an introduction to computing in R      Week 2    git/GitHub     Week 3   R and R markdown     Week 4   Visualization basics          MODULE 2: host-virus associations      Week 5   An intro to VIRION and strings     Week 6   Data manipulation (base + plyr/dplyr) + CI         MODULE 3: species distribution modeling      Week 7 my_location  Intro to APIs and spatial data     Week 8 my_location  Visualizing and modelling species occurrence data + Docker     Spring break  --- ---      Week 10 my_location  Making informed models + model performance         MODULE 4: ecological simulation      Week 11  satellite Intro to simulation, looping and apply     Week 12  satellite lists and parallelization     Week 13  satellite Probabilistic processes     Week 14  face Wrap up and big picture         FINAL PROJECTS     Week 15 school  Final Project presentations     Week 15 (GIVE ACTUAL DATE HERE) school  Final Projects DUE       </description>
     </item>
     
     <item>
@@ -82,7 +82,8 @@ GeoSpatial Textbook: Geocomputation with R (Lovelace, Nowosad, Muenchow)
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/read/spatial/</guid>
-      <description>Reading   Chapter 1: Introduction
+      <description>Reading   Brunsdon and Comber (2020) Opening practice: supporting reproducibility and critical spatial data science. Journal of Geographical Systems https://doi.org/10.1007/s10109-020-00334-2
+  Chapter 1: Introduction
   Introduction to APIs [Nice blog post]
   </description>
     </item>
@@ -124,7 +125,8 @@ GeoSpatial Textbook: Geocomputation with R (Lovelace, Nowosad, Muenchow)
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/read/parallel/</guid>
-      <description>Readings working with lists  Focus on the lists subsection [Advanced R]  parallel computing in R   Parallel computing in R [NCEAS tutorial]
+      <description>Readings  Burton, A. W. (1991). Parallel processing in large-scale simulation: motivation and methods. Computing &amp;amp; Control Engineering Journal, 2(2), 74-79.
+ working with lists  Focus on the lists subsection [Advanced R]  parallel computing in R   Parallel computing in R [NCEAS tutorial]
   parallel package [blog post]
   </description>
     </item>
@@ -188,9 +190,10 @@ Instructional Methods As a flipped classroom, students are provided with either 
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/read/sdm/</guid>
-      <description>Reading   SDMs SDM intro
-  Model performance Norberg et al. 2020
-  Pay close attention to how the model performance was assessed in terms of accuracy, discrimination, calibration, and precision.</description>
+      <description>Reading   Breiman, L. (2001). Statistical modeling: The two cultures (with comments and a rejoinder by the author). Statistical science, 16(3), 199-231.
+  SDMs SDM intro
+  Model performance and model comparison Norberg et al. 2020
+  </description>
     </item>
     
     <item>

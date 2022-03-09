@@ -51,7 +51,8 @@ GeoSpatial Textbook: Geocomputation with R (Lovelace, Nowosad, Muenchow)
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/read/spatial/</guid>
-      <description>Reading   Chapter 1: Introduction
+      <description>Reading   Brunsdon and Comber (2020) Opening practice: supporting reproducibility and critical spatial data science. Journal of Geographical Systems https://doi.org/10.1007/s10109-020-00334-2
+  Chapter 1: Introduction
   Introduction to APIs [Nice blog post]
   </description>
     </item>
@@ -84,7 +85,8 @@ GeoSpatial Textbook: Geocomputation with R (Lovelace, Nowosad, Muenchow)
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/read/parallel/</guid>
-      <description>Readings working with lists  Focus on the lists subsection [Advanced R]  parallel computing in R   Parallel computing in R [NCEAS tutorial]
+      <description>Readings  Burton, A. W. (1991). Parallel processing in large-scale simulation: motivation and methods. Computing &amp;amp; Control Engineering Journal, 2(2), 74-79.
+ working with lists  Focus on the lists subsection [Advanced R]  parallel computing in R   Parallel computing in R [NCEAS tutorial]
   parallel package [blog post]
   </description>
     </item>
@@ -138,9 +140,10 @@ GeoSpatial Textbook: Geocomputation with R (Lovelace, Nowosad, Muenchow)
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/read/sdm/</guid>
-      <description>Reading   SDMs SDM intro
-  Model performance Norberg et al. 2020
-  Pay close attention to how the model performance was assessed in terms of accuracy, discrimination, calibration, and precision.</description>
+      <description>Reading   Breiman, L. (2001). Statistical modeling: The two cultures (with comments and a rejoinder by the author). Statistical science, 16(3), 199-231.
+  SDMs SDM intro
+  Model performance and model comparison Norberg et al. 2020
+  </description>
     </item>
     
     <item>
