@@ -102,3 +102,65 @@ range(giraffe2[["year"]], na.rm = TRUE)
 
 plot(table(giraffe2[["year"]]))
 
+
+
+install.packages('RSQLite')
+install.packages('dbplyr')
+install.packages('DBI')
+
+library(DBI)
+library(RSQLite)
+library(dbplyr)
+library(dplyr)
+getwd()
+setwd("amk_notes")
+list.files()
+
+dir.create("data_raw")
+setwd('..')
+
+
+dir.create("data_raw", showWarnings = FALSE)
+download.file(url = "https://ndownloader.figshare.com/files/2292171",
+              destfile = "data_raw/portal_mammals.sqlite", mode = "wb")
+mammals <- DBI::dbConnect(RSQLite::SQLite(), "data_raw/portal_mammals.sqlite")
+dbplyr::src_dbi(mammals)
+
+str(mammals)
+# this data base contains three different tables 
+# small mammals in the desert community
+# species found and data about each survey 
+# 
+
+#need the tbl fxn from within dplyr to get the tables of data 
+
+dplyr::tbl(mammals, sql("SELECT year, species_id, plot_id FROM surveys"))
+
+surveys <- dplyr::tbl(mammals, "surveys")
+surveys %>%
+  dplyr::select(year, species_id, plot_id)
+
+
+surveys2 <- surveys %>%
+  dplyr::filter(weight < 5) %>%
+  dplyr::select(species_id, sex, weight)
+
+
+surveys3 <- dplyr::collect(surveys2)
+head(surveys3)
+dim(surveys3)
+
+
+plots <- dplyr::tbl(mammals, "plots")
+plots
+
+survPlot <- dplyr::left_join(surveys, plots, by='plot_id')
+survPlot <- dplyr::collect(survPlot)
+#hindfoot_length weight
+
+plot(weight~hindfoot_length, data = survPlot, col = rainbow(48)[as.factor(survPlot$species_id)])
+
+
+points(species_id, col = "blue")
+points(1:5, runif(5), pch=16,
+              col='orange'))
