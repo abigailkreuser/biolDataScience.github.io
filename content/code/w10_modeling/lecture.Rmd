@@ -50,12 +50,12 @@ The explanatory variables are used to explain or predict the response variable (
 y <- runif(100)
 x <- y ** runif(100, 1,4)
 
-m1 <- lm(y~x)
-
 
 plot(y=y,x=x, pch=16, 
 	ylab='y', xlab='x', 
 	col='dodgerblue', las=1)
+
+m1 <- lm(y~x)
 abline(m1, lwd=2)
 
 ```
