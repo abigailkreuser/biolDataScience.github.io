@@ -84,6 +84,7 @@ So now we will construct a cluster of 2 nodes. This should hypothetically cut th
 
 
 ```{r}
+
 cl <- parallel::makeCluster(2)
 cl
 
@@ -238,28 +239,265 @@ system.time(plyr::ldply(lst, .parallel=TRUE, .fun=mean))
 
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-No we have finished with the cluster `cl` and we can stop it using the `parallel::stopCluster` function. 
+Now we have finished with the cluster `cl` and we can stop it using the `parallel::stopCluster` function. 
 
 ```{r}
 
 parallel::stopCluster(cl)
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+**Practice**: 
+
+Remember the logistic model we went over before? 
+
+
+```{r}
+logisticGrowth <- function(n, r, k){
+  n*exp(r*(1-(n / k)))
+}
+
+
+logisticDynamics <- function(n,r,k, steps=100){
+  ret <- c()
+  ret[1] <- n
+  if(length(r) == 1){
+    r <- rep(r, steps)
+  }
+  for(i in 1:(steps-1)){
+    ret[i+1] <- logisticGrowth(ret[i], r[i], k)
+  }
+  return(ret)
+}
+```
+
+
+
+Write code that runs logisticDynamics in parallel, running out the dynamics of the logistic model for 100 steps, but starting with population sizes between 1 and 1000. 
+
+
+```{r}
+
+
+
+```
+
+
+
+
+
+Do the same thing, but with a for loop. 
+
+```{r}
+
+
+
+
+
+```
+
+
+
+Wrap both approaches in a `system.time()` call to explore how long each takes. 
+
+
+
+
+
+
+> Read this for Thursday: https://cyclismo.org/tutorial/R/probability.html 
+> Roger Peng's book may also help for this: https://bookdown.org/rdpeng/rprogdatascience/simulation.html#generating-random-numbers
+
+> For more info on parallel computing, gentle introduction here https://bookdown.org/rdpeng/rprogdatascience/parallel-computation.html
+
+
+
+
+
+
+
+
+
+
+
+## Line profiling
+
+
+Using `system.time()` is one way to do line profiling, but it's a bit coarse, in that the entire expression is wrapped around the `system.time()` call. But what if want to know not only how long something takes, but also what constituent parts of the code are running fastest/slowest? We can use built-in line profiling tools like `Rprof` to address this. 
+
+
+```{r}
+Rprof()     ## Turn on the profiler
+## ALL YOUR CODE 
+Rprof(NULL) ## Turn off the profiler 
+```
+
+
+```{r}
+summaryRprof()
+```
+
+
+
+
+
+
+
+
+
+
+
+---
+
+## Connecting and running code on remote machines 
+
+SSH stands for secure shell, a way to remotely connect to computers or servers. These machines are typically always on, have more memory than your local machine, or you just want to be able to run code for longer periods of time without taxing your local machine and not turning it off. 
+
+Let's go over some basics of `ssh` and how to incorporate these tools into your workflow. If we have time, we can also sign up for the local U of South Carolina cluster and work through job submission. This is a similar process (`ssh`), but computing clusters (since they have many many users) need to have a job manager (e.g., slurm) which requires the user to write a shell script that specifies how much resources, which resources, and for how long. 
+
+
+
+
+
+
+
+### ssh 
+
+First, you may need to install `ssh` on your local machine. 
+
+> For Windows users, this may (or may not) require you download PuTTY. Or you may be able to do this process through the Window subsystem for linux (wsl). 
+
+
+```{ }
+sudo apt update
+sudo apt install openssh-server
+sudo systemctl status ssh
+
+```
+
+if you the above final line of code does not result in something that looks like it's running ssh service, then you can manually enable it by issuing the command
+
+```
+sudo systemctl enable --now ssh
+```
+
+For Windows users, the above **should** work if you remove the `sudo` bits (since you are a root user). But we can work through some errors in class potentially. For Mac users, you should have ssh already ready to go, but if not, try the following commands
+
+```
+sudo systemsetup -getremotelogin
+sudo systemsetup -setremotelogin on
+```
+
+where the top line should check if remote login is enabled, and the second line should turn it on if it is not already on. 
+
+
+The structure of an ssh call is the following
+
+```
+ssh USERNAME@IP.ADDRESS
+```
+
+An example of this would be something like
+
+
+```
+ssh guest@10.80.193.202
+```
+
+Note that you must be connected to the same network in this case to ssh. This means that if you are connecting from off campus, you will need to use the campus VPN to remote into any machine. More on this for different operating systems can be found here: 
+
+https://sc.edu/about/offices_and_divisions/division_of_information_technology/security/training/remote_working_security/index.php
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### terminal multiplexers 
+
+It's a cool name, and there are a few different options. I use `screen`, but another great option is `tmux`. The end goal is the same, to allow for a single terminal window to be partitioned out into multiple terminal sessions, and _most importantly_ to be able to detach from terminal sessions. 
+
+This is important, as it allows you to remote into a computer, start running code, and then break the connection without causing the code to stop running. Then you can remote back into the machine and re-attach to the running terminal session. We'll use `screen` below to show the utility in this. 
+
+
+
+screen may be pre-installed. If not, install it. 
+
+```
+sudo apt update
+sudo apt install screen
+```
+
+
+Now let's explore how to use `screen` on your local machine. 
+
+```
+screen 
+```
+
+When you issue the screen command, not much should change, but you are asked to hit enter (I believe) and then you'll be in the screen session, meaning you can detach using `cntrl+a+d` or `screen -D`. This may close your terminal screen, but it's still a terminal session that is there, it's just now detached. You can re-attach to the terminal session using `screen -r ` followed by the session name. To see the ongoing screen sessions, you can use `screen -ls`. The session name starts with a number, so if you wanted to reattach to that particular screen instance (and assuming you had more than 1 screen instance running), you would need to specify which screen instance to re-attach to using `screen -r 30485094.pts-1.office` where the last bit calls the specific session. 
+
+It's good practice to start `screen` instances with an informative session name. You can do this when starting a screen session 
+
+
+```
+screen -S test 
+```
+
+Now consider how you would use this to run an analysis. You could create a screen instance, start running some long running code in R, and then detach from the session, close your computer, and know that your analysis was safely running on the remote machine. 
+
+
+But here we run into file management issues, potentially. The remote machine does not have the same files as you have on your local machine, meaning that you will have to move files back and forth between remote and local machines, or always run code on a remote machine by first pulling a git repository from GitHub. This second approach is probably best, to avoid multiple copies of the same files being on both local and remote machines. However, you may encouter a situation where the result of an analysis is too big to version on GitHub, meaning you run the analysis, save the necessary bits, and then cannot push back to GitHub from the remote machine. You can use `scp` to move files between remote and local machines, in this case. 
+
+```
+scp localFileSource Destination
+```
+
+So let's say I want to move something from my local machine to the remote machine. I am logged into my local machine, and I would issue a command like 
+
+```
+scp file.RData tad@10.90.123.123:
+```
+
+This would move `file.RData` to the remote machine, and place the file in the home directory (or whatever is the default directory of the remote machine). Moving a file from a remote machine is possible as well from your local machine, by specifying the source as the remote machine
+
+```
+scp tad@10.90.123.123:file.RData /home/
+
+```
+
+where this would move `file.RData` from the remote machine to the local machine, specifically in the `/home/` directory (be sure that whatever path you tell it actually exists, or else it'll error out). 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -283,8 +521,6 @@ parallel::stopCluster(cl)
 # Assorted tips and tricks from someone who fails often
 
 These will likely mostly center around `R`, but are essentially things that I have learned the hard way while programming my way to where I am now. 
-
-
 
 
 ### keep your analytical pipeline organized and consistent between projects

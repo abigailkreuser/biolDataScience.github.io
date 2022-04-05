@@ -575,7 +575,6 @@ This folder contains all the files associated with your manuscript or project wr
 
 
 
-
 ## unit testing, make, and continuous integration
 
 Test your code. Allows for dynamic reports, where the source data can be dynamically updated (e.g., if you were doing COVID-19 analysis, your code would certainly benefit from being able to pull the latest case counts, no?). We'll go over three different things that can help with report generation and automation. 
@@ -734,6 +733,22 @@ or we could use wildcards to source all R scripts within the directory
 
 
 
+
+
+
+
+
+apt -y update
+apt -y install nano
+
+
+
+
+
+
+
+
+
 ```{r, eval=FALSE}
 
 R_FILES=$(wildcard *.R)
@@ -803,6 +818,8 @@ Let's build on the previous case of the Makefile, as we can re-run the make temp
         run: make 
 
 ```
+
+
 
 
 

@@ -1,10 +1,11 @@
 R_FILES = $(wildcard *.R)
 TEXFILE = $(wildcard *.tex)
 
-analysis: analysis.RData
+analysis: 
 	Rscript -e "install.packages('plyr')"
 	R CMD BATCH $(R_FILES)
-
+  Rscript -e "rmarkdown::render('lecture.Rmd')"
+ 
 view:
 	evince $(TEXFILE).pdf &
 
