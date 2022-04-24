@@ -1,0 +1,434 @@
+---
+title: "Extra stuff"
+author: "Tad Dallas"
+includes:
+  in_header:
+    - \usepackage{lmodern}
+output:
+  pdf_document:
+    fig_caption: yes
+    fig_height: 6
+    fig_width: 6
+    toc: yes
+  html_document:
+    fig_caption: yes
+    fig_height: 6
+    fig_width: 6
+    highlight: tango
+    theme: journal
+---
+
+
+
+> This final lecture (not a whole week) was based on what individual students wanted to hear about. 
+
+
+
+
+## A GBM workflow
+
+
+```{r}
+library(gbm)
+
+```
+
+
+
+
+Things to consider:
++ distribution family of the data (below is for binomial data)
++ how much data do you want to use for training versus testing? random subset or non-random?
++ 
++ 
+
+```{r}
+
+#' Train BRT model on simulated data
+#'
+#' @param y response variable 
+#' @param dat variables used in modeling y
+#' @param trainFrac fraction of data used for model training
+#' @param seed set.seed for random number generation 
+#' @param cores number of cores to use for model training
+#' @param intDepth interaction depth for GBM
+#' @param maxTrees the maximum number of trees to consider
+#' @param distro family argument for response 
+#' 
+#' @returns list of model, predictions, and AUC
+
+trainGBM <- function(y, dat,
+	trainFrac = 0.7, 
+  seed=123456, cores=6,
+  intDepth=4, 
+  maxTrees=20000, 
+  distro='bernoulli'){
+  
+  require(ROCR)
+  require(gbm)
+  
+  if(is.null(dat) || inherits(dat, 'error')){
+    return(NA)
+  }else{
+		inds <- sample(1:nrow(dat), round(trainFrac*nrow(dat),0))
+		train <- dat[inds,]
+		test <- dat[-inds,]
+    yTrain <- y[inds]
+    yTest <- y[-inds]
+
+		## train models
+		temp <- tryCatch(
+		  gbm::gbm(yTrain ~ ., data = train, n.trees = maxTrees,
+		      interaction.depth = intDepth, distribution = distro,
+		      n.cores = cores, cv.folds=5), error = function(e){e}
+		)
+		if(!inherits(temp, 'error')){
+		  brt.best.iter <- gbm.perf(temp, method='cv')
+		  preds <- predict(temp, newdata=test, n.trees=brt.best.iter, type='response')
+      brt.preds <- prediction(preds, yTest)
+		  brt.perf  <- performance(brt.preds,"tpr","fpr")
+		  brt.perfAUC <- unlist(performance(brt.preds, 'auc')@y.values)
+      
+		  return(list(mod=temp, preds=data.frame(preds,yTest), auc = brt.perfAUC))
+		}
+  }
+}
+
+```
+
+
+
+
+
+```{r}
+
+tmp <- trainGBM(y=rbinom(1000, 1, 0.25), dat=data.frame(runif(1000), runif(1000)))
+
+```
+
+
+
+
+
+Partial dependence plots
+
+```{r}
+
+plot(tmp[[1]], i.var=1)
+plot(tmp[[1]], i.var=2)
+
+```
+
+
+
+
+
+Variable importance 
+
+```{r}
+
+summary(tmp[[1]])
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Organizing multiple scripts into a coherent workflow
+
+
+The question arose about how to best organize a scientific workflow that may start to get a bit large in terms of the number of lines of code or lots of dependencies or interworking parts. I'm a big fan of having all data pre-processing, simulation, analyses, and plotting in a single R markdown file. It makes things easier on the user (in my mind), and reduces risk of odd dependencies among scripts leading to errors and headaches. 
+
+In R for Data Science, Wickham suggests using Rprojects https://r4ds.had.co.nz/workflow-projects.html for workflow management, which does not preclude having multiple R scripts which are all stitched together by make, docker, or continuous integration (GitHub Actions or other). 
+
+In Kitzes, Tuerk, and Deniz's edited volume "The Practice of Reproducible Research", chapter 3 does a nice job laying out the analytical pipeline, using a toy example and a shell script to make sure the analytical pipeline is run in the correct way (http://www.practicereproducibleresearch.org/core-chapters/3-basic.html). 
+
+Whichever you way you opt to set up your workflow, the running of code should not just be left up to the user to figure out. There should be clearly written metadata, maybe a flowchart for the analytical pipeline, and some form of automation in the running of the different scripts. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Optimization 
+
+
+Optimization is attempt to minimize error. Think of the true value (perhaps of the slope of a linear model) as the one which minimizes some loss or error function. This might conjure up images of basins of attraction. We can get at the true parameter in a number of ways. First, we could simply search across that entire parameter space, and then create that likelihood surface, identifying the minimum value as the best fit. There are entire courses on optimization, so I won't be able to go over it in much depth here. 
+
+One good resource for those interested in thinking about optimization and model fitting further, especially in the context of building predictive models, would be Andrew Ng's machine learning course (https://www.coursera.org/learn/machine-learning). Here I'll use the SIR model from the reading as a way to introduce some optimization techniques. This has the added benefit of getting us used to the weird format that `optim` likes. 
+
+
+We'll start with the SIR model
+
+
+```{r}
+
+sir_equations <- function(time, variables, parameters) {
+  with(as.list(c(variables, parameters)), {
+    dS <- -beta * I * S
+    dI <-  beta * I * S - gamma * I
+    dR <-  gamma * I
+    return(list(c(dS, dI, dR)))
+  })
+}
+
+```
+
+
+State variables 
+
+```{r}
+initial_values <- c(
+  S = 999,  # number of susceptibles at time = 0
+  I =   1,  # number of infectious at time = 0
+  R =   0   # number of recovered (and immune) at time = 0
+)
+
+```
+
+
+
+Parameters
+
+```{r}
+parameters_values <- c(
+  beta  = 0.004, # infectious contact rate (/person/day)
+  gamma = 0.5    # recovery rate (/day)
+)
+```
+
+
+
+Time 
+
+```{r}
+time_values <- seq(0, 10) # days
+
+```
+
+
+
+What does the output of sir_equations look like? 
+
+```{r}
+
+sir_equations(1, 
+  variables=initial_values, 
+  parameters=parameters_values)
+
+sir_equations(10, 
+  variables=initial_values, 
+  parameters=parameters_values)
+  
+sir_equations(100, 
+  variables=initial_values, 
+  parameters=parameters_values)
+  
+```
+
+
+Time does not really matter, but the structure of `sir_equations` has to have time as the first argument. This is because of the way that optim wants it. 
+
+
+
+
+
+
+```{r}
+
+flu <- read.table("https://bit.ly/2vDqAYN", header = TRUE)
+
+```
+
+
+
+In order to compare the SIR model dynamics to the empirical data, we need to be able to simulate the SIR model under given parameter estimates, and then compare it to the empirical data. This comparison is going to define out likelihood space. 
+
+
+
+```{r}
+
+sir_1 <- function(beta, gamma, S0, I0, R0, times) {
+  require(deSolve) # for the "ode" function
+  
+# the differential equations:
+  sir_equations <- function(time, variables, parameters) {
+  with(as.list(c(variables, parameters)), {
+    dS <- -beta * I * S
+    dI <-  beta * I * S - gamma * I
+    dR <-  gamma * I
+    return(list(c(dS, dI, dR)))
+  })
+  }
+  
+# the parameters values:
+  parameters_values <- c(beta  = beta, gamma = gamma)
+
+# the initial values of variables:
+  initial_values <- c(S = S0, I = I0, R = R0)
+  
+# solving
+  out <- deSolve::ode(initial_values, times, sir_equations, parameters_values)
+
+# returning the output:
+  as.data.frame(out)
+}
+```
+
+
+
+
+
+The next function calculates the sum of squares between simulated data from the SIR model and the true data. 
+
+```{r} 
+
+ss <- function(beta, gamma, data = flu, N = 763) {
+  I0 <- data$cases[1]
+  times <- data$day
+  predictions <- sir_1(beta = beta, gamma = gamma,   
+    S0 = N - I0, I0 = I0, R0 = 0, 
+    times = times)                
+  sum((predictions$I[-1] - data$cases[-1])^2)
+}
+
+```
+
+
+
+
+
+
+The range of betas for ss 
+
+```{r}
+
+beta_val <- seq(from = 0.0016, to = 0.004, le = 100)
+ss_val <- sapply(beta_val, ss, gamma = 0.5)
+beta_hat <- beta_val[ss_val == min(ss_val)]
+
+```
+
+
+
+
+
+
+```{r}
+
+plot(beta_val, ss_val, type = "l", lwd = 2,
+     xlab = expression(paste("Transmission ", beta)),
+     ylab = "sum of squares")
+# adding the minimal value of the sum of squares:
+abline(h = min_ss_val, lty = 2, col = "grey")
+# adding the estimate of beta:
+abline(v = beta_hat, lty = 2, col = "grey")
+
+```
+
+
+
+But often we want to optimize over multiple parameters. For instance, in the SIR model, transmission rate (beta) is not the only parameter, as we also have recovery rate (gamma). 
+
+```{r}
+
+n <- 30 # number of parameters values
+beta_val <- seq(from = 0.002, to = 0.0035, le = n)
+gamma_val <- seq(from = 0.3, to = 0.65, le = n)
+# calculating the sum of squares:
+param_val <- expand.grid(beta_val, gamma_val)
+ss_val <- with(param_val, Map(ss, Var1, Var2))
+ss_val <- unlist(ss_val)
+
+ind <- which.min(ss_val)
+beta_hat <- param_val$Var1[ind]
+gamma_hat <- param_val$Var2[ind]
+
+```
+
+### visualizing the sum of squares profile
+
+
+```{r}
+
+ss_val <- matrix(ss_val, n)
+image(beta_val, gamma_val, ss_val,
+      xlab = expression(paste("infectious contact rate ", beta, " (/person/day)")),
+      ylab = expression(paste("recovery rate ", gamma, " (/day)")))
+contour(beta_val, gamma_val,ss_val, add = TRUE)
+points(beta_hat, gamma_hat, pch = 3)
+box(bty = "o")
+
+```
+
+
+
+
+But above, we look across ranges of parameter values, simulate the model under some parameterization, and then calculate the sum of squares. This is a rather silly way to approach optimization. What would be better if we had an algorithm that moved around in parameter space, traversing parameter space in a way to try to find the minimum without having to search the entire parameter space. 
+
+> What are the potential issues when approaching optimization like this? 
+
+
+
+
+```{r}
+
+starting_param_val <- c(0.004, 0.5)
+ss_optim <- optim(starting_param_val, function(x){ss(x[1],x[2])})
+
+# our previous brute force optimization 
+min(ss_val)
+# optim 
+ss_optim$value 
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+How well does our SIR model with optimized parameter values capture flu data in the time series? 
+
+> I have no idea where the population size of 763 came from, but this is the value they use for population size. 
+
+
+```{r}
+
+par(mar=c(4,4,0.5,0.5))
+plot(flu$cases, pch=16, ylim=c(0,350), ylab='Infected individuals', xlab='Time')
+simulated <- sir_1(beta=ss_optim$par[1], gamma=ss_optim$par[2], S0=763, I0=1, R0=1, times=1:14)$I
+lines(simulated, lwd=2, col='dodgerblue')
+
+
+```
