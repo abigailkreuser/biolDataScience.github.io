@@ -285,7 +285,8 @@ logisticDynamics <- function(n,r,k, steps=100){
 
 
 
-Write code that runs logisticDynamics in parallel, running out the dynamics of the logistic model for 100 steps, but starting with population sizes between 1 and 1000. 
+Write code that runs logisticDynamics in parallel, running out the dynamics of the logistic model for 
+100 steps, but starting with population sizes between 1 and 1000. 
 
 
 ```{r}
